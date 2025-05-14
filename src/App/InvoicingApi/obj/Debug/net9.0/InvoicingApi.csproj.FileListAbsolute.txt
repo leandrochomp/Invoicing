@@ -33,3 +33,7 @@
 /home/chomp/Source/Invoicing/src/App/InvoicingApi/obj/Debug/net9.0/InvoicingApi.pdb
 /home/chomp/Source/Invoicing/src/App/InvoicingApi/obj/Debug/net9.0/InvoicingApi.genruntimeconfig.cache
 /home/chomp/Source/Invoicing/src/App/InvoicingApi/obj/Debug/net9.0/ref/InvoicingApi.dll
+/home/chomp/Source/Invoicing/src/App/InvoicingApi/bin/Debug/net9.0/FastEndpoints.dll
+/home/chomp/Source/Invoicing/src/App/InvoicingApi/bin/Debug/net9.0/FastEndpoints.Attributes.dll
+/home/chomp/Source/Invoicing/src/App/InvoicingApi/bin/Debug/net9.0/FastEndpoints.Messaging.Core.dll
+/home/chomp/Source/Invoicing/src/App/InvoicingApi/bin/Debug/net9.0/FluentValidation.dll

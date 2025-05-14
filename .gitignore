@@ -26,6 +26,8 @@ bld/
 *.pfx
 *.publishsettings
 orleans.codegen.cs
+*.cache
+*.info
 
 # Visual Studio / Rider
 .vs/
@@ -42,8 +44,9 @@ _ReSharper*/
 
 # NuGet
 *.nupkg
-**/packages/*
-!**/packages/build/
+*.snupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
 *.nuget.props
 *.nuget.targets
 
