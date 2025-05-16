@@ -8,6 +8,7 @@ builder.Services.AddTelemetry(builder.Configuration);
 
 // Add API services from configurator
 builder.Services.AddApiServices();
+builder.Services.AddDatabaseServices(builder.Configuration);
 
 var app = builder.Build();
 

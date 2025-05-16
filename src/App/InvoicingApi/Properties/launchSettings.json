@@ -8,7 +8,15 @@
       "launchUrl": "scalar/v1",
       "applicationUrl": "http://localhost:5224",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "DB_HOST": "localhost",
+        "DB_PORT": "5432",
+        "DB_NAME": "invoicing",
+        "DB_USER": "postgres",
+        "DB_PASSWORD": "postgres",
+        "DB_MIN_POOL_SIZE": "1",
+        "DB_MAX_POOL_SIZE": "20",
+        "DB_INCLUDE_ERROR_DETAIL": true
       }
     },
     "https": {
@@ -18,7 +26,15 @@
       "launchUrl": "scalar/v1",
       "applicationUrl": "https://localhost:7220;http://localhost:5224",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "DB_HOST": "localhost",
+        "DB_PORT": "5432",
+        "DB_NAME": "invoicing",
+        "DB_USER": "postgres",
+        "DB_PASSWORD": "postgres",
+        "DB_MIN_POOL_SIZE": "1",
+        "DB_MAX_POOL_SIZE": "20",
+        "DB_INCLUDE_ERROR_DETAIL": true
       }
     }
   }
