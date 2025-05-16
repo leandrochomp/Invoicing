@@ -13,6 +13,7 @@ builder.Services.AddDatabaseServices(builder.Configuration);
 var app = builder.Build();
 
 // Configure the API
-app.ConfigureApi();
+app.ConfigureApi()
+    .RunMigrations();
 
 app.Run();

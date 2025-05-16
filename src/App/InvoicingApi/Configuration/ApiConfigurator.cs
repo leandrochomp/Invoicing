@@ -1,5 +1,6 @@
 using System.Data.Common;
 using FastEndpoints;
+using FluentMigrator.Runner;
 using Scalar.AspNetCore;
 using Shared.Infrastructure.Data;
 using Shared.Infrastructure.UnitOfWork;
@@ -32,6 +33,15 @@ public static class ApiConfigurator
             return new Npgsql.NpgsqlConnection(provider.GetConnectionString());
         });
         
+        // Configure FluentMigrator
+        services.AddFluentMigratorCore()
+            .ConfigureRunner(rb => rb
+                .AddPostgres()
+                .WithGlobalConnectionString(sp =>
+                    sp.GetRequiredService<IConnectionStringProvider>().GetConnectionString())
+                .ScanIn(typeof(Shared.Infrastructure.Migrations.MigrationMarker).Assembly).For.Migrations())
+            .AddLogging(lb => lb.AddFluentMigratorConsole());
+        
         return services;
     }
 
@@ -56,6 +66,15 @@ public static class ApiConfigurator
         
         app.UseHttpsRedirection();
         
+        return app;
+    }
+    
+    public static WebApplication RunMigrations(this WebApplication app)
+    {
+        using var scope = app.Services.CreateScope();
+        var runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
+        runner.MigrateUp();
+    
         return app;
     }
 }
