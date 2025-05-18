@@ -1,8 +1,5 @@
-using System.Data.Common;
 using FastEndpoints;
 using Scalar.AspNetCore;
-using Shared.Infrastructure.Data;
-using Shared.Infrastructure.UnitOfWork;
 
 namespace InvoicingApi.Configuration;
 
@@ -12,25 +9,6 @@ public static class ApiConfigurator
     {
         services.AddFastEndpoints();
         services.AddOpenApi();
-        
-        return services;
-    }
-    
-    public static IServiceCollection AddDatabaseServices(this IServiceCollection services, IConfiguration configuration)
-    {
-        // Register connection string provider
-        services.AddSingleton<IConnectionStringProvider, ConnectionStringProvider>();
-        
-        // Register UnitOfWork and DbContext
-        services.AddSingleton<IUnitOfWork, UnitOfWork>();
-        services.AddScoped<IDbContext, DapperDbContext>();
-        
-        // Register DbConnection using the provider
-        services.AddSingleton<DbConnection>(sp => 
-        {
-            var provider = sp.GetRequiredService<IConnectionStringProvider>();
-            return new Npgsql.NpgsqlConnection(provider.GetConnectionString());
-        });
         
         return services;
     }

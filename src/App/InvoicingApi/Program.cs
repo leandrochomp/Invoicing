@@ -1,5 +1,6 @@
 using InvoicingApi.Configuration;
 using InvoicingApi.Hosting.Config;
+using Shared.Infrastructure.Configuration.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
