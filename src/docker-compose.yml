@@ -1,0 +1,102 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: invoicing-postgres
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_DB: ${DB_NAME:-invoicing}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: api
+    container_name: invoicing-api
+    ports:
+      - "5000:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ENVIRONMENT:-Development}
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME:-invoicing}
+      - DB_USER=${DB_USER:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  grpc:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: grpc
+    container_name: invoicing-grpc
+    ports:
+      - "5001:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ENVIRONMENT:-Development}
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME:-invoicing}
+      - DB_USER=${DB_USER:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  bff:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: bff
+    container_name: invoicing-bff
+    ports:
+      - "5002:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ENVIRONMENT:-Development}
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME:-invoicing}
+      - DB_USER=${DB_USER:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+    depends_on:
+      postgres:
+        condition: service_healthy
+  
+  migrations:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: migrations
+    container_name: invoicing-migrations
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME:-invoicing}
+      - DB_USER=${DB_USER:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: >
+      bash -c "
+        echo 'Removing existing migrations...' &&
+        rm -f Shared/Migrations/*.cs &&
+        echo 'Creating fresh initial migration...' &&
+        dotnet ef migrations add InitialCreate --project Shared/Shared.csproj --startup-project App/InvoicingApi/InvoicingApi.csproj --context AppDbContext --verbose &&
+        echo 'Applying migration to database...' &&
+        dotnet ef database update --project Shared/Shared.csproj --startup-project App/InvoicingApi/InvoicingApi.csproj --context AppDbContext --verbose
+      "
+
+volumes:
+  postgres-data:
