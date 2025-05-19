@@ -25,6 +25,14 @@ dotnet new grpc -o src/App/InvoicingGrpc
 dotnet sln Invoicing.sln add src/App/InvoicingBff/InvoicingBff.csproj src/App/InvoicingGrpc/InvoicingGrpc.csproj
 ```
 
+### Docker support:
+```bash
+make build # build the solution
+make migration # create a migration
+make up # get all containers up
+make clean # remove all containers
+```
+
 # Database Migrations
 
 ## Prerequisites
