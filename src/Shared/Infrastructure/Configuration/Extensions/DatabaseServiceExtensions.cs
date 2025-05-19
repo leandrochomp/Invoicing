@@ -16,13 +16,14 @@ public static class DatabaseServiceExtensions
         services.AddSingleton<IUnitOfWork, UnitOfWork.UnitOfWork>();
         
         // Configure and register DbContext with EF Core
-        services.AddDbContext<AppDbContext>(options =>
+        services.AddDbContext<AppDbContext>((provider, options) =>
         {
-            var connectionStringProvider = services.BuildServiceProvider().GetRequiredService<IConnectionStringProvider>();
-            options.UseNpgsql(connectionStringProvider.GetConnectionString(), 
+            var connectionStringProvider = provider.GetRequiredService<IConnectionStringProvider>();
+            
+            options.UseNpgsql(connectionStringProvider.GetConnectionString(),
                 npgsqlOptions => npgsqlOptions.UseNodaTime());
         });
-        
+
         services.AddScoped<IAppDbContext>(provider => provider.GetRequiredService<AppDbContext>());
 
         // Register DbConnection using the provider
