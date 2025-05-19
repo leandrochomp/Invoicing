@@ -1,11 +1,7 @@
-using System.Diagnostics;
 using System.Text.Encodings.Web;
 using System.Text.Json;
-using Npgsql;
 using OpenTelemetry.Logs;
-using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
-using OpenTelemetry.Trace;
 
 namespace InvoicingApi.Hosting.Config;
 
@@ -44,44 +40,5 @@ public static class LoggingConfig
         });
         
         return builder;
-    }
-    
-    public static IServiceCollection AddTelemetry(this IServiceCollection services, IConfiguration configuration)
-    {
-        var serviceName = configuration["ServiceName"] ?? "InvoicingApi";
-        var serviceVersion = configuration["ServiceVersion"] ?? "1.0.0";
-
-        services.AddOpenTelemetry()
-            .WithTracing(builder => builder
-                .SetResourceBuilder(
-                    ResourceBuilder.CreateDefault()
-                        .AddService(serviceName, serviceVersion: serviceVersion)
-                        .AddTelemetrySdk()
-                        .AddEnvironmentVariableDetector())
-                .AddSource(serviceName)
-                .AddAspNetCoreInstrumentation()
-                .AddHttpClientInstrumentation()
-                .AddNpgsql()
-                .AddConsoleExporter()
-                .AddOtlpExporter(options =>
-                {
-                    options.Endpoint = new Uri(configuration["OpenTelemetry:Endpoint"] ?? "http://localhost:4317");
-                }))
-            .WithMetrics(builder => builder
-                .SetResourceBuilder(
-                    ResourceBuilder.CreateDefault()
-                        .AddService(serviceName, serviceVersion: serviceVersion))
-                .AddAspNetCoreInstrumentation()
-                .AddHttpClientInstrumentation()
-                .AddConsoleExporter()
-                .AddOtlpExporter(options =>
-                {
-                    options.Endpoint = new Uri(configuration["OpenTelemetry:Endpoint"] ?? "http://localhost:4317");
-                }));
-                
-        // Add ActivitySource for custom tracing
-        services.AddSingleton(new ActivitySource(serviceName));
-        
-        return services;
     }
 }

@@ -1,12 +1,11 @@
-using Npgsql;
 using Microsoft.Extensions.Configuration;
+using Npgsql;
 
 namespace Shared.Infrastructure.Data;
 
 public interface IConnectionStringProvider
 {
     string GetConnectionString();
-    string GetConnectionString(string name);
 }
 
 public class ConnectionStringProvider : IConnectionStringProvider
@@ -42,18 +41,5 @@ public class ConnectionStringProvider : IConnectionStringProvider
         };
 
         return builder.ConnectionString;
-
-    }
-
-    public string GetConnectionString(string name)
-    {
-        var connectionString = _configuration.GetConnectionString(name);
-
-        if (string.IsNullOrEmpty(connectionString))
-        {
-            throw new InvalidOperationException($"Connection string '{name}' not found.");
-        }
-
-        return connectionString;
     }
 }
