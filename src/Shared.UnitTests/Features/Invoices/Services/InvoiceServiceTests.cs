@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using NSubstitute.ReturnsExtensions;
@@ -13,6 +14,7 @@ public class InvoiceServiceTests
 {
     private readonly IInvoiceRepository _invoiceRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ILogger<InvoiceService> _logger;
     private readonly InvoiceService _invoiceService;
 
     public InvoiceServiceTests()
@@ -20,7 +22,8 @@ public class InvoiceServiceTests
         // Setup mocks
         _invoiceRepository = Substitute.For<IInvoiceRepository>();
         _unitOfWork = Substitute.For<IUnitOfWork>();
-        _invoiceService = new InvoiceService(_invoiceRepository, _unitOfWork);
+        _logger = Substitute.For<ILogger<InvoiceService>>();
+        _invoiceService = new InvoiceService(_invoiceRepository, _unitOfWork, _logger);
     }
 
     [Fact]
@@ -255,5 +258,100 @@ public class InvoiceServiceTests
         // Verify transaction flow
         await _unitOfWork.Received(1).BeginTransactionAsync();
         await _unitOfWork.Received(0).CommitAsync();
+    }
+
+    [Fact]
+    public async Task CreateInvoice_ShouldLogAppropriateMessages()
+    {
+        // Arrange
+        var clientId = Guid.NewGuid();
+        var invoice = new Invoice
+        {
+            ClientId = clientId,
+            InvoiceNumber = "INV-001",
+            TotalAmount = 100.0m
+        };
+        
+        var savedInvoice = new Invoice
+        {
+            Id = Guid.NewGuid(),
+            ClientId = clientId,
+            InvoiceNumber = "INV-001",
+            TotalAmount = 100.0m
+        };
+        
+        _invoiceRepository.CreateInvoice(invoice, _unitOfWork.Transaction).Returns(savedInvoice);
+
+        // Act
+        var result = await _invoiceService.CreateInvoice(invoice);
+
+        // Assert
+        // Verify logging messages were called
+        _logger.Received(1).Log(
+            LogLevel.Information,
+            Arg.Any<EventId>(),
+            Arg.Is<object>(o => o.ToString().Contains($"Creating invoice for client: {clientId}")),
+            Arg.Any<Exception>(),
+            Arg.Any<Func<object, Exception, string>>()
+        );
+        
+        _logger.Received(1).Log(
+            LogLevel.Information,
+            Arg.Any<EventId>(),
+            Arg.Is<object>(o => o.ToString().Contains($"Invoice {savedInvoice.Id} created successfully")),
+            Arg.Any<Exception>(),
+            Arg.Any<Func<object, Exception, string>>()
+        );
+    }
+    
+    [Fact]
+    public async Task CreateInvoice_WhenExceptionOccurs_ShouldLogError()
+    {
+        // Arrange
+        var clientId = Guid.NewGuid();
+        var invoice = new Invoice
+        {
+            ClientId = clientId,
+            InvoiceNumber = "INV-001",
+            TotalAmount = 100.0m
+        };
+        
+        var expectedException = new Exception("Database error");
+        _invoiceRepository.CreateInvoice(invoice, _unitOfWork.Transaction).Throws(expectedException);
+
+        // Act & Assert
+        var exception = await Should.ThrowAsync<Exception>(() => _invoiceService.CreateInvoice(invoice));
+        
+        // Verify error logging occurred
+        _logger.Received(1).Log(
+            LogLevel.Error,
+            Arg.Any<EventId>(),
+            Arg.Any<object>(),
+            Arg.Is<Exception>(e => e == expectedException),
+            Arg.Any<Func<object, Exception, string>>()
+        );
+    }
+    
+    [Fact]
+    public async Task UpdateInvoiceStatus_WithInvalidId_ShouldLogWarning()
+    {
+        // Arrange
+        var invoiceId = Guid.NewGuid();
+        var newStatus = InvoiceStatus.Paid;
+        
+        _invoiceRepository.GetInvoiceById(invoiceId, _unitOfWork.Transaction).ReturnsNull();
+
+        // Act
+        var result = await _invoiceService.UpdateInvoiceStatus(invoiceId, newStatus);
+
+        // Assert
+        // Verify warning logging occurred
+        _logger.Received(1).Log(
+            LogLevel.Warning,
+            Arg.Any<EventId>(),
+            Arg.Is<object>(o => o.ToString().Contains($"Invoice {invoiceId} not found")),
+            Arg.Any<Exception>(),
+            Arg.Any<Func<object, Exception, string>>()
+        );
     }
 }

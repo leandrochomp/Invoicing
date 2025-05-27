@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using NodaTime;
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;
@@ -16,6 +17,7 @@ public class PaymentServiceTests
     private readonly IPaymentRepository _paymentRepository;
     private readonly IInvoiceRepository _invoiceRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ILogger<PaymentService> _logger;
     private readonly PaymentService _paymentService;
 
     public PaymentServiceTests()
@@ -24,7 +26,8 @@ public class PaymentServiceTests
         _paymentRepository = Substitute.For<IPaymentRepository>();
         _invoiceRepository = Substitute.For<IInvoiceRepository>();
         _unitOfWork = Substitute.For<IUnitOfWork>();
-        _paymentService = new PaymentService(_paymentRepository, _invoiceRepository, _unitOfWork);
+        _logger = Substitute.For<ILogger<PaymentService>>();
+        _paymentService = new PaymentService(_paymentRepository, _invoiceRepository, _unitOfWork, _logger);
     }
 
     [Fact]
@@ -351,5 +354,94 @@ public class PaymentServiceTests
         await _unitOfWork.Received(1).BeginTransactionAsync();
         await _paymentRepository.DidNotReceive().DeletePayment(Arg.Any<Guid>(), _unitOfWork.Transaction);
         await _unitOfWork.Received(0).CommitAsync();
+    }
+
+    [Fact]
+    public async Task CreatePayment_ShouldLogAppropriateMessages()
+    {
+        // Arrange
+        var invoiceId = Guid.NewGuid();
+        var invoice = new Invoice
+        {
+            Id = invoiceId,
+            TotalAmount = 200m,
+            Status = InvoiceStatus.Sent
+        };
+        
+        var payment = new Payment
+        {
+            InvoiceId = invoiceId,
+            AmountPaid = 100m
+        };
+        
+        var existingPayments = new List<Payment>();
+        
+        var savedPayment = new Payment
+        {
+            Id = Guid.NewGuid(),
+            InvoiceId = invoiceId,
+            AmountPaid = 100m,
+            PaymentDate = SystemClock.Instance.GetCurrentInstant()
+        };
+        
+        _invoiceRepository.GetInvoiceById(invoiceId, _unitOfWork.Transaction).Returns(invoice);
+        _paymentRepository.CreatePayment(payment, _unitOfWork.Transaction).Returns(savedPayment);
+        _paymentRepository.GetPaymentsByInvoiceId(invoiceId, _unitOfWork.Transaction).Returns(existingPayments);
+
+        // Act
+        var result = await _paymentService.CreatePayment(payment);
+
+        // Assert
+        // Verify logging messages were called
+        _logger.Received(1).Log(
+            LogLevel.Information,
+            Arg.Any<EventId>(),
+            Arg.Is<object>(o => o.ToString().Contains($"Creating payment for invoice: {invoiceId}")),
+            Arg.Any<Exception>(),
+            Arg.Any<Func<object, Exception, string>>()
+        );
+        
+        _logger.Received(1).Log(
+            LogLevel.Information,
+            Arg.Any<EventId>(),
+            Arg.Is<object>(o => o.ToString().Contains($"Invoice {invoiceId} marked as PartiallyPaid")),
+            Arg.Any<Exception>(),
+            Arg.Any<Func<object, Exception, string>>()
+        );
+        
+        _logger.Received(1).Log(
+            LogLevel.Information,
+            Arg.Any<EventId>(),
+            Arg.Is<object>(o => o.ToString().Contains($"Payment {savedPayment.Id} created successfully")),
+            Arg.Any<Exception>(),
+            Arg.Any<Func<object, Exception, string>>()
+        );
+    }
+
+    [Fact]
+    public async Task CreatePayment_WithInvalidInvoiceId_ShouldLogError()
+    {
+        // Arrange
+        var invoiceId = Guid.NewGuid();
+        var payment = new Payment
+        {
+            InvoiceId = invoiceId,
+            AmountPaid = 100m
+        };
+        
+        _invoiceRepository.GetInvoiceById(invoiceId, _unitOfWork.Transaction).ReturnsNull();
+
+        // Act & Assert
+        var exception = await Should.ThrowAsync<InvalidOperationException>(
+            () => _paymentService.CreatePayment(payment));
+        
+        // Verify error logging occurred
+        _logger.Received(1).Log(
+            LogLevel.Error,
+            Arg.Any<EventId>(),
+            Arg.Is<object>(o => o.ToString().Contains($"Invoice with ID {invoiceId} not found")),
+            Arg.Any<Exception>(),
+            Arg.Any<Func<object, Exception, string>>()
+        );
     }
 }

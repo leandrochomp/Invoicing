@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using NSubstitute.ReturnsExtensions;
@@ -13,6 +14,7 @@ public class ClientServiceTests
 {
     private readonly IClientRepository _clientRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ILogger<ClientService> _logger;
     private readonly ClientService _clientService;
 
     public ClientServiceTests()
@@ -20,7 +22,8 @@ public class ClientServiceTests
         // Setup mocks
         _clientRepository = Substitute.For<IClientRepository>();
         _unitOfWork = Substitute.For<IUnitOfWork>();
-        _clientService = new ClientService(_clientRepository, _unitOfWork);
+        _logger = Substitute.For<ILogger<ClientService>>();
+        _clientService = new ClientService(_clientRepository, _unitOfWork, _logger);
     }
 
     [Fact]
@@ -218,5 +221,104 @@ public class ClientServiceTests
         await _unitOfWork.Received(1).BeginTransactionAsync();
         await _unitOfWork.Received(1).RollbackAsync();
         await _unitOfWork.DidNotReceive().CommitAsync();
+    }
+
+    [Fact]
+    public async Task CreateClient_ShouldLogAppropriateMessages()
+    {
+        // Arrange
+        var client = new Client
+        {
+            Name = "New Client",
+            Email = "client@example.com"
+        };
+        
+        var savedClient = new Client
+        {
+            Id = Guid.NewGuid(),
+            Name = client.Name,
+            Email = client.Email
+        };
+        
+        _clientRepository.CreateClient(client, _unitOfWork.Transaction).Returns(savedClient);
+
+        // Act
+        var result = await _clientService.CreateClient(client);
+
+        // Assert
+        // Verify logging messages were called
+        _logger.Received(1).Log(
+            LogLevel.Information,
+            Arg.Any<EventId>(),
+            Arg.Is<object>(o => o.ToString().Contains($"Creating client: {client.Name}")),
+            Arg.Any<Exception>(),
+            Arg.Any<Func<object, Exception, string>>()
+        );
+        
+        _logger.Received(1).Log(
+            LogLevel.Information,
+            Arg.Any<EventId>(),
+            Arg.Is<object>(o => o.ToString().Contains($"Client {savedClient.Id} created successfully")),
+            Arg.Any<Exception>(),
+            Arg.Any<Func<object, Exception, string>>()
+        );
+    }
+    
+    [Fact]
+    public async Task CreateClient_WhenExceptionOccurs_ShouldLogError()
+    {
+        // Arrange
+        var client = new Client
+        {
+            Name = "New Client",
+            Email = "client@example.com"
+        };
+        
+        var expectedException = new Exception("Database error");
+        _clientRepository.CreateClient(client, _unitOfWork.Transaction).Throws(expectedException);
+
+        // Act & Assert
+        var exception = await Should.ThrowAsync<Exception>(() => _clientService.CreateClient(client));
+        
+        // Verify error logging occurred
+        _logger.Received(1).Log(
+            LogLevel.Error,
+            Arg.Any<EventId>(),
+            Arg.Any<object>(),
+            Arg.Is<Exception>(e => e == expectedException),
+            Arg.Any<Func<object, Exception, string>>()
+        );
+    }
+    
+    [Fact]
+    public async Task DeleteClient_ShouldLogDeletion()
+    {
+        // Arrange
+        var clientId = Guid.NewGuid();
+        
+        _clientRepository.DeleteClient(clientId, _unitOfWork.Transaction).Returns(true);
+
+        // Act
+        var result = await _clientService.DeleteClient(clientId);
+
+        // Assert
+        result.ShouldBeTrue();
+        
+        // Verify logging messages
+        _logger.Received(1).Log(
+            LogLevel.Information,
+            Arg.Any<EventId>(),
+            Arg.Is<object>(o => o.ToString().Contains($"Deleting client: {clientId}")),
+            Arg.Any<Exception>(),
+            Arg.Any<Func<object, Exception, string>>()
+        );
+        
+        _logger.Received(1).Log(
+            LogLevel.Information,
+            Arg.Any<EventId>(),
+            Arg.Is<object>(o => o.ToString().Contains($"Client {clientId} deleted successfully")),
+            Arg.Any<Exception>(),
+            Arg.Any<Func<object, Exception, string>>()
+        );
     }
 }
