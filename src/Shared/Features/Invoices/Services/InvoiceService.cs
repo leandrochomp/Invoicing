@@ -5,14 +5,59 @@ using Shared.Infrastructure.UnitOfWork;
 
 namespace Shared.Features.Invoices.Services;
 
+/// <summary>
+/// Manages invoice CRUD operations of invoices.
+/// Handles invoice status changes and maintains invoice data integrity.
+/// </summary>
 public interface IInvoiceService
 {
+    /// <summary>
+    /// Retrieves all invoices in the system.
+    /// </summary>
+    /// <returns>A collection of all invoices.</returns>
     Task<IEnumerable<Invoice>> GetAllInvoices();
+    
+    /// <summary>
+    /// Retrieves a specific invoice by its unique identifier.
+    /// </summary>
+    /// <param name="id">The unique identifier of the invoice.</param>
+    /// <returns>The invoice if found; otherwise, null.</returns>
     Task<Invoice?> GetInvoiceById(Guid id);
+    
+    /// <summary>
+    /// Retrieves all invoices associated with a specific client.
+    /// </summary>
+    /// <param name="clientId">The unique identifier of the client.</param>
+    /// <returns>A collection of invoices for the specified client.</returns>
     Task<IEnumerable<Invoice>> GetInvoicesByClientId(Guid clientId);
+    
+    /// <summary>
+    /// Creates a new invoice with the provided information.
+    /// </summary>
+    /// <param name="invoice">The invoice information to create.</param>
+    /// <returns>The created invoice with its assigned ID.</returns>
     Task<Invoice> CreateInvoice(Invoice invoice);
+    
+    /// <summary>
+    /// Updates an existing invoice with new information.
+    /// </summary>
+    /// <param name="invoice">The invoice with updated information.</param>
+    /// <returns>True if the update was successful; otherwise, false.</returns>
     Task<bool> UpdateInvoice(Invoice invoice);
+    
+    /// <summary>
+    /// Deletes an invoice by its unique identifier.
+    /// </summary>
+    /// <param name="id">The unique identifier of the invoice to delete.</param>
+    /// <returns>True if the deletion was successful; otherwise, false.</returns>
     Task<bool> DeleteInvoice(Guid id);
+    
+    /// <summary>
+    /// Updates the status of an invoice.
+    /// </summary>
+    /// <param name="id">The unique identifier of the invoice.</param>
+    /// <param name="status">The new status to apply to the invoice.</param>
+    /// <returns>True if the status update was successful; otherwise, false.</returns>
     Task<bool> UpdateInvoiceStatus(Guid id, InvoiceStatus status);
 }
 

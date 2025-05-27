@@ -8,13 +8,51 @@ using Shared.Infrastructure.UnitOfWork;
 
 namespace Shared.Features.Payments.Services;
 
+/// <summary>
+/// Manages payment CRUD operations of payments.
+/// Also handles payment processing logic and updating invoice statuses based on payments.
+/// </summary>
 public interface IPaymentService
 {
+    /// <summary>
+    /// Retrieves all payments in the system.
+    /// </summary>
+    /// <returns>A collection of all payments.</returns>
     Task<IEnumerable<Payment>> GetAllPayments();
+    
+    /// <summary>
+    /// Retrieves a specific payment by its unique identifier.
+    /// </summary>
+    /// <param name="id">The unique identifier of the payment.</param>
+    /// <returns>The payment if found; otherwise, null.</returns>
     Task<Payment?> GetPaymentById(Guid id);
+    
+    /// <summary>
+    /// Retrieves all payments associated with a specific invoice.
+    /// </summary>
+    /// <param name="invoiceId">The unique identifier of the invoice.</param>
+    /// <returns>A collection of payments for the specified invoice.</returns>
     Task<IEnumerable<Payment>> GetPaymentsByInvoiceId(Guid invoiceId);
+    
+    /// <summary>
+    /// Creates a new payment and updates the related invoice status.
+    /// </summary>
+    /// <param name="payment">The payment information to create.</param>
+    /// <returns>The created payment with its assigned ID.</returns>
     Task<Payment> CreatePayment(Payment payment);
+    
+    /// <summary>
+    /// Updates an existing payment and recalculates related invoice status.
+    /// </summary>
+    /// <param name="payment">The payment with updated information.</param>
+    /// <returns>True if the update was successful; otherwise, false.</returns>
     Task<bool> UpdatePayment(Payment payment);
+    
+    /// <summary>
+    /// Deletes a payment and updates the related invoice status.
+    /// </summary>
+    /// <param name="id">The unique identifier of the payment to delete.</param>
+    /// <returns>True if the deletion was successful; otherwise, false.</returns>
     Task<bool> DeletePayment(Guid id);
 }
 

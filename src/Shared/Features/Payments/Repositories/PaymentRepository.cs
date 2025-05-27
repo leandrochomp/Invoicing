@@ -7,13 +7,57 @@ using Shared.Infrastructure.UnitOfWork;
 
 namespace Shared.Features.Payments.Repositories;
 
+/// <summary>
+/// Provides data access operations for payments including retrieval, creation, update, and deletion.
+/// Handles database interactions and transaction management for payment-related operations.
+/// </summary>
 public interface IPaymentRepository
 {
+    /// <summary>
+    /// Retrieves all active (non-deleted) payments.
+    /// </summary>
+    /// <param name="transaction">Optional database transaction for coordinating multiple operations.</param>
+    /// <returns>A collection of all active payments.</returns>
     Task<IEnumerable<Payment>> GetAll(DbTransaction? transaction = null);
+    
+    /// <summary>
+    /// Retrieves a specific payment by its unique identifier.
+    /// </summary>
+    /// <param name="id">The unique identifier of the payment.</param>
+    /// <param name="transaction">Optional database transaction for coordinating multiple operations.</param>
+    /// <returns>The payment if found and active; otherwise, null.</returns>
     Task<Payment?> GetPaymentById(Guid id, DbTransaction? transaction = null);
+    
+    /// <summary>
+    /// Retrieves all active payments associated with a specific invoice.
+    /// </summary>
+    /// <param name="invoiceId">The unique identifier of the invoice.</param>
+    /// <param name="transaction">Optional database transaction for coordinating multiple operations.</param>
+    /// <returns>A collection of active payments for the specified invoice.</returns>
     Task<IEnumerable<Payment>> GetPaymentsByInvoiceId(Guid invoiceId, DbTransaction? transaction = null);
+    
+    /// <summary>
+    /// Creates a new payment in the database.
+    /// </summary>
+    /// <param name="payment">The payment information to create.</param>
+    /// <param name="transaction">Optional database transaction for coordinating multiple operations.</param>
+    /// <returns>The created payment with its assigned ID and creation timestamp.</returns>
     Task<Payment> CreatePayment(Payment payment, DbTransaction? transaction = null);
+    
+    /// <summary>
+    /// Updates an existing payment with new information.
+    /// </summary>
+    /// <param name="payment">The payment with updated information.</param>
+    /// <param name="transaction">Optional database transaction for coordinating multiple operations.</param>
+    /// <returns>True if the update was successful; otherwise, false.</returns>
     Task<bool> UpdatePayment(Payment payment, DbTransaction? transaction = null);
+    
+    /// <summary>
+    /// Soft-deletes a payment by marking it as deleted in the database.
+    /// </summary>
+    /// <param name="id">The unique identifier of the payment to delete.</param>
+    /// <param name="transaction">Optional database transaction for coordinating multiple operations.</param>
+    /// <returns>True if the deletion was successful; otherwise, false.</returns>
     Task<bool> DeletePayment(Guid id, DbTransaction? transaction = null);
 }
 
@@ -125,3 +169,4 @@ public class PaymentRepository : IPaymentRepository
         return true;
     }
 }
+

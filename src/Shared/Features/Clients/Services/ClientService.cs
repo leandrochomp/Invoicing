@@ -5,12 +5,44 @@ using Shared.Infrastructure.UnitOfWork;
 
 namespace Shared.Features.Clients.Services;
 
+/// <summary>
+/// Manages client CRUD operations of clients.
+/// Provides the core functionality for client management in the invoicing system.
+/// </summary>
 public interface IClientService
 {
+    /// <summary>
+    /// Retrieves all clients in the system.
+    /// </summary>
+    /// <returns>A collection of all clients.</returns>
     Task<IEnumerable<Client>> GetAllClients();
+    
+    /// <summary>
+    /// Retrieves a specific client by its unique identifier.
+    /// </summary>
+    /// <param name="id">The unique identifier of the client.</param>
+    /// <returns>The client if found; otherwise, null.</returns>
     Task<Client?> GetClientById(Guid id);
+    
+    /// <summary>
+    /// Creates a new client with the provided information.
+    /// </summary>
+    /// <param name="client">The client information to create.</param>
+    /// <returns>The created client with its assigned ID.</returns>
     Task<Client> CreateClient(Client client);
+    
+    /// <summary>
+    /// Updates an existing client with new information.
+    /// </summary>
+    /// <param name="client">The client with updated information.</param>
+    /// <returns>True if the update was successful; otherwise, false.</returns>
     Task<bool> UpdateClient(Client client);
+    
+    /// <summary>
+    /// Deletes a client by its unique identifier.
+    /// </summary>
+    /// <param name="id">The unique identifier of the client to delete.</param>
+    /// <returns>True if the deletion was successful; otherwise, false.</returns>
     Task<bool> DeleteClient(Guid id);
 }
 
