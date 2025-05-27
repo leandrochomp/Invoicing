@@ -5,7 +5,7 @@ option csharp_namespace = "InvoicingGrpc";
 package client;
 
 // Client service for managing customers
-service ClientService {
+service ClientProtoService {
   // Creates a new client
   rpc CreateClient (CreateClientRequest) returns (ClientResponse);
   
@@ -26,9 +26,9 @@ service ClientService {
 message CreateClientRequest {
   string name = 1;
   string email = 2;
-  string phone = 3;
+  string phone_number = 3;
   string address = 4;
-  string tax_id = 5;
+  string company_name = 5;
 }
 
 // Request for fetching a specific client
@@ -56,9 +56,9 @@ message UpdateClientRequest {
   string client_id = 1;
   string name = 2;
   string email = 3;
-  string phone = 4;
+  string phone_number = 4;
   string address = 5;
-  string tax_id = 6;
+  string company_name = 6;
 }
 
 // Request for deleting a client
@@ -77,9 +77,9 @@ message ClientResponse {
   string client_id = 1;
   string name = 2;
   string email = 3;
-  string phone = 4;
+  string phone_number = 4;
   string address = 5;
-  string tax_id = 6;
+  string company_name = 6;
   string created_at = 7;
   string updated_at = 8;
 }

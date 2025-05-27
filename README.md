@@ -5,6 +5,9 @@
 * BFF (Backend for Frontend) - TODO
 * EF Core
 
+# Design Solution:
+* Vertical Slice Architecture
+
 # Development Tools:
 * dotnet cli
 * Jetbrains Rider 2025.1.2 (Non-commercial)

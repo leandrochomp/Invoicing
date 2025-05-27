@@ -1,4 +1,4 @@
-.PHONY: build up down ps logs api grpc bff migration migration-add migration-remove migration-script clean database-check
+.PHONY: build up down ps logs api grpc bff migration migration-add migration-remove migration-script clean database-check db
 
 # Default Docker Compose project name
 COMPOSE_PROJECT_NAME ?= invoicing
@@ -35,6 +35,9 @@ grpc:
 
 bff:
 	$(DOCKER_COMPOSE) up -d bff
+
+db:
+	$(DOCKER_COMPOSE) up -d postgres
 
 # Database migration targets
 migration:

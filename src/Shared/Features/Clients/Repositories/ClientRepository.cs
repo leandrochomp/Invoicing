@@ -117,6 +117,8 @@ public class ClientRepository : IClientRepository
         existingClient.Name = client.Name;
         existingClient.Email = client.Email;
         existingClient.Address = client.Address;
+        existingClient.PhoneNumber = client.PhoneNumber;
+        existingClient.CompanyName = client.CompanyName;
         existingClient.UpdatedAt = SystemClock.Instance.GetCurrentInstant();
     
         await _dbContext.SaveChangesAsync();

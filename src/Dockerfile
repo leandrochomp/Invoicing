@@ -12,6 +12,7 @@ COPY ["Shared/Shared.csproj", "Shared/"]
 COPY ["App/InvoicingApi/InvoicingApi.csproj", "App/InvoicingApi/"]
 COPY ["InvoicingGrpc/InvoicingGrpc.csproj", "InvoicingGrpc/"]
 COPY ["InvoicingBff/InvoicingBff.csproj", "InvoicingBff/"]
+COPY ["Shared.UnitTests/Shared.UnitTests.csproj", "Shared.UnitTests/"]
 
 # Copy Directory.* files for centralized package management
 COPY ["Directory.Build.props", "./"]
