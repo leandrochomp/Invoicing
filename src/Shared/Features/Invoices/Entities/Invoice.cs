@@ -19,6 +19,22 @@ public class Invoice : BaseEntity
     public Client Client { get; set; } = default!;
     public ICollection<InvoiceItem> Items { get; set; } = new List<InvoiceItem>();
     public ICollection<Payment> Payments { get; set; } = new List<Payment>();
+    
+    public void UpdateStatusBasedOnPayments(decimal totalPaid)
+    {
+        Status = DetermineStatus(totalPaid);
+    }
+
+    private InvoiceStatus DetermineStatus(decimal totalPaid)
+    {
+        if (totalPaid >= TotalAmount)
+        {
+            return InvoiceStatus.Paid;
+        }
+        
+        return totalPaid > 0 ? InvoiceStatus.PartiallyPaid : InvoiceStatus.Sent;
+    }
+    
 }
 
 public enum InvoiceStatus
