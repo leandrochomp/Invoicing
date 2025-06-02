@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+using Shared.Infrastructure.Data;
 using System.Data;
 using System.Data.Common;
 
@@ -14,20 +16,16 @@ public interface IUnitOfWork : IDisposable
 
 public class UnitOfWork : IUnitOfWork
 {
-    private readonly DbConnection _connection;
+    private readonly AppDbContext _dbContext;
     private DbTransaction? _transaction;
     private bool _disposed;
 
-    public UnitOfWork(DbConnection connection)
+    public UnitOfWork(AppDbContext dbContext)
     {
-        _connection = connection;
-        if (_connection.State != ConnectionState.Open)
-        {
-            _connection.Open();
-        }
+        _dbContext = dbContext;
     }
 
-    public DbConnection Connection => _connection;
+    public DbConnection Connection => _dbContext.Database.GetDbConnection();
     public DbTransaction? Transaction => _transaction;
 
     public async Task BeginTransactionAsync(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
@@ -37,12 +35,14 @@ public class UnitOfWork : IUnitOfWork
             throw new InvalidOperationException("Transaction already started");
         }
 
-        if (_connection.State != ConnectionState.Open)
+        if (Connection.State != ConnectionState.Open)
         {
-            await _connection.OpenAsync();
+            await Connection.OpenAsync();
         }
 
-        _transaction = await _connection.BeginTransactionAsync(isolationLevel);
+        _transaction = await Connection.BeginTransactionAsync(isolationLevel);
+        
+        await _dbContext.Database.UseTransactionAsync(_transaction);
     }
 
     public async Task CommitAsync()
@@ -97,7 +97,7 @@ public class UnitOfWork : IUnitOfWork
         if (disposing)
         {
             _transaction?.Dispose();
-            _connection.Dispose();
+            // Don't dispose the connection here as it's owned by DbContext
         }
 
         _disposed = true;

@@ -80,7 +80,7 @@ public class ClientService : IClientService
         try
         {
             await _unitOfWork.BeginTransactionAsync();
-            var result = await _clientRepository.CreateClient(client, _unitOfWork.Transaction);
+            var result = await _clientRepository.CreateClient(client);
             await _unitOfWork.CommitAsync();
             _logger.LogInformation("Client {ClientId} created successfully", result.Id);
             return result;
@@ -99,7 +99,7 @@ public class ClientService : IClientService
         try
         {
             await _unitOfWork.BeginTransactionAsync();
-            var result = await _clientRepository.UpdateClient(client, _unitOfWork.Transaction);
+            var result = await _clientRepository.UpdateClient(client);
             await _unitOfWork.CommitAsync();
             _logger.LogInformation("Client {ClientId} updated successfully", client.Id);
             return result;
@@ -118,7 +118,7 @@ public class ClientService : IClientService
         try
         {
             await _unitOfWork.BeginTransactionAsync();
-            var result = await _clientRepository.DeleteClient(id, _unitOfWork.Transaction);
+            var result = await _clientRepository.DeleteClient(id);
             await _unitOfWork.CommitAsync();
             _logger.LogInformation("Client {ClientId} deleted successfully", id);
             return result;

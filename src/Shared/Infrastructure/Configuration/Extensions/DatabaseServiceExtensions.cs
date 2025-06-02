@@ -1,4 +1,3 @@
-using System.Data.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,7 +12,6 @@ public static class DatabaseServiceExtensions
     {
         // Register connection string provider
         services.AddSingleton<IConnectionStringProvider, ConnectionStringProvider>();
-        services.AddSingleton<IUnitOfWork, UnitOfWork.UnitOfWork>();
         
         // Configure and register DbContext with EF Core
         services.AddDbContext<AppDbContext>((provider, options) =>
@@ -25,13 +23,10 @@ public static class DatabaseServiceExtensions
         });
 
         services.AddScoped<IAppDbContext>(provider => provider.GetRequiredService<AppDbContext>());
-
-        // Register DbConnection using the provider
-        services.AddSingleton<DbConnection>(sp =>
-        {
-            var provider = sp.GetRequiredService<IConnectionStringProvider>();
-            return new Npgsql.NpgsqlConnection(provider.GetConnectionString());
-        });
+        
+        // Register UnitOfWork with the AppDbContext, not generic DbContext
+        services.AddScoped<IUnitOfWork>(provider => 
+            new UnitOfWork.UnitOfWork(provider.GetRequiredService<AppDbContext>()));
 
         return services;
     }
