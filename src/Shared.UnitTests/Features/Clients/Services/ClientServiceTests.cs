@@ -97,7 +97,7 @@ public class ClientServiceTests
             Email = client.Email
         };
         
-        _clientRepository.CreateClient(client, _unitOfWork.Transaction).Returns(savedClient);
+        _clientRepository.CreateClient(client).Returns(savedClient);
 
         // Act
         var result = await _clientService.CreateClient(client);
@@ -108,7 +108,7 @@ public class ClientServiceTests
         
         // Verify transaction flow
         await _unitOfWork.Received(1).BeginTransactionAsync();
-        await _clientRepository.Received(1).CreateClient(client, _unitOfWork.Transaction);
+        await _clientRepository.Received(1).CreateClient(client);
         await _unitOfWork.Received(1).CommitAsync();
     }
 
@@ -123,7 +123,7 @@ public class ClientServiceTests
         };
         
         var expectedException = new Exception("Database error");
-        _clientRepository.CreateClient(client, _unitOfWork.Transaction).Throws(expectedException);
+        _clientRepository.CreateClient(client).Throws(expectedException);
 
         // Act & Assert
         var exception = await Should.ThrowAsync<Exception>(() => _clientService.CreateClient(client));
@@ -146,7 +146,7 @@ public class ClientServiceTests
             Email = "updated@example.com"
         };
         
-        _clientRepository.UpdateClient(client, _unitOfWork.Transaction).Returns(true);
+        _clientRepository.UpdateClient(client).Returns(true);
 
         // Act
         var result = await _clientService.UpdateClient(client);
@@ -156,7 +156,7 @@ public class ClientServiceTests
         
         // Verify transaction flow
         await _unitOfWork.Received(1).BeginTransactionAsync();
-        await _clientRepository.Received(1).UpdateClient(client, _unitOfWork.Transaction);
+        await _clientRepository.Received(1).UpdateClient(client);
         await _unitOfWork.Received(1).CommitAsync();
     }
 
@@ -172,7 +172,7 @@ public class ClientServiceTests
         };
         
         var expectedException = new Exception("Database error");
-        _clientRepository.UpdateClient(client, _unitOfWork.Transaction).Throws(expectedException);
+        _clientRepository.UpdateClient(client).Throws(expectedException);
 
         // Act & Assert
         var exception = await Should.ThrowAsync<Exception>(() => _clientService.UpdateClient(client));
@@ -190,7 +190,7 @@ public class ClientServiceTests
         // Arrange
         var clientId = Guid.NewGuid();
         
-        _clientRepository.DeleteClient(clientId, _unitOfWork.Transaction).Returns(true);
+        _clientRepository.DeleteClient(clientId).Returns(true);
 
         // Act
         var result = await _clientService.DeleteClient(clientId);
@@ -200,7 +200,7 @@ public class ClientServiceTests
         
         // Verify transaction flow
         await _unitOfWork.Received(1).BeginTransactionAsync();
-        await _clientRepository.Received(1).DeleteClient(clientId, _unitOfWork.Transaction);
+        await _clientRepository.Received(1).DeleteClient(clientId);
         await _unitOfWork.Received(1).CommitAsync();
     }
 
@@ -211,7 +211,7 @@ public class ClientServiceTests
         var clientId = Guid.NewGuid();
         
         var expectedException = new Exception("Database error");
-        _clientRepository.DeleteClient(clientId, _unitOfWork.Transaction).Throws(expectedException);
+        _clientRepository.DeleteClient(clientId).Throws(expectedException);
 
         // Act & Assert
         var exception = await Should.ThrowAsync<Exception>(() => _clientService.DeleteClient(clientId));
@@ -240,7 +240,7 @@ public class ClientServiceTests
             Email = client.Email
         };
         
-        _clientRepository.CreateClient(client, _unitOfWork.Transaction).Returns(savedClient);
+        _clientRepository.CreateClient(client).Returns(savedClient);
 
         // Act
         var result = await _clientService.CreateClient(client);
@@ -275,7 +275,7 @@ public class ClientServiceTests
         };
         
         var expectedException = new Exception("Database error");
-        _clientRepository.CreateClient(client, _unitOfWork.Transaction).Throws(expectedException);
+        _clientRepository.CreateClient(client).Throws(expectedException);
 
         // Act & Assert
         var exception = await Should.ThrowAsync<Exception>(() => _clientService.CreateClient(client));
@@ -296,7 +296,7 @@ public class ClientServiceTests
         // Arrange
         var clientId = Guid.NewGuid();
         
-        _clientRepository.DeleteClient(clientId, _unitOfWork.Transaction).Returns(true);
+        _clientRepository.DeleteClient(clientId).Returns(true);
 
         // Act
         var result = await _clientService.DeleteClient(clientId);

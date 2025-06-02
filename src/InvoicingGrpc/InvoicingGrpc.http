@@ -1,0 +1,43 @@
+// Define the base address of your gRPC service
+@host = localhost:5225
+
+### Create a new client
+GRPC @host/client.ClientProtoService/CreateClient
+{
+  "name": "Test Client",
+  "email": "test@example.com",
+  "phone_number": "123-456-7890",
+  "address": "123 Test St",
+  "company_name": "Test Company"
+}
+
+### Get client by ID
+GRPC @host/client.ClientProtoService/GetClient
+{
+  "client_id": "your-client-id-here"
+}
+
+### List clients
+GRPC @host/client.ClientProtoService/ListClients
+{
+  "page_size": 10,
+  "page_number": 1,
+  "search_term": ""
+}
+
+### Update a client
+GRPC @host/client.ClientProtoService/UpdateClient
+{
+  "client_id": "your-client-id-here",
+  "name": "Updated Name",
+  "email": "updated@example.com",
+  "phone_number": "987-654-3210",
+  "address": "456 Update St",
+  "company_name": "Updated Company"
+}
+
+### Delete a client
+GRPC @host/client.ClientProtoService/DeleteClient
+{
+  "client_id": "your-client-id-here"
+}
