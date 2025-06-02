@@ -16,41 +16,36 @@ public interface IClientRepository
     /// <summary>
     /// Retrieves all active (non-deleted) clients.
     /// </summary>
-    /// <param name="transaction">Optional database transaction for coordinating multiple operations.</param>
     /// <returns>A collection of all active clients.</returns>
-    Task<IEnumerable<Client>> GetAll(DbTransaction? transaction = null);
+    Task<IEnumerable<Client>> GetAll();
     
     /// <summary>
     /// Retrieves a specific client by its unique identifier.
     /// </summary>
     /// <param name="id">The unique identifier of the client.</param>
-    /// <param name="transaction">Optional database transaction for coordinating multiple operations.</param>
     /// <returns>The client if found and active; otherwise, null.</returns>
-    Task<Client?> GetClientById(Guid id, DbTransaction? transaction = null);
+    Task<Client?> GetClientById(Guid id);
     
     /// <summary>
     /// Creates a new client in the database.
     /// </summary>
     /// <param name="client">The client information to create.</param>
-    /// <param name="transaction">Optional database transaction for coordinating multiple operations.</param>
     /// <returns>The created client with its assigned ID and creation timestamp.</returns>
-    Task<Client> CreateClient(Client client, DbTransaction? transaction = null);
+    Task<Client> CreateClient(Client client);
     
     /// <summary>
     /// Updates an existing client with new information.
     /// </summary>
     /// <param name="client">The client with updated information.</param>
-    /// <param name="transaction">Optional database transaction for coordinating multiple operations.</param>
     /// <returns>True if the update was successful; otherwise, false.</returns>
-    Task<bool> UpdateClient(Client client, DbTransaction? transaction = null);
+    Task<bool> UpdateClient(Client client);
     
     /// <summary>
     /// Soft-deletes a client by marking it as deleted in the database.
     /// </summary>
     /// <param name="id">The unique identifier of the client to delete.</param>
-    /// <param name="transaction">Optional database transaction for coordinating multiple operations.</param>
     /// <returns>True if the deletion was successful; otherwise, false.</returns>
-    Task<bool> DeleteClient(Guid id, DbTransaction? transaction = null);
+    Task<bool> DeleteClient(Guid id);
 }
 
 public class ClientRepository : IClientRepository
@@ -62,33 +57,18 @@ public class ClientRepository : IClientRepository
         _dbContext = dbContext;
     }
 
-    public async Task<IEnumerable<Client>> GetAll(DbTransaction? transaction = null)
+    public async Task<IEnumerable<Client>> GetAll()
     {
-        if (transaction != null)
-        {
-            await _dbContext.Database.UseTransactionAsync(transaction);
-        }
-
         return await _dbContext.Clients.Where(c => !c.IsDeleted).ToListAsync();
     }
 
-    public async Task<Client?> GetClientById(Guid id, DbTransaction? transaction = null)
+    public async Task<Client?> GetClientById(Guid id)
     {
-        if (transaction != null)
-        {
-            await _dbContext.Database.UseTransactionAsync(transaction);
-        }
-
         return await _dbContext.Clients.Where(client => client.Id == id && !client.IsDeleted).FirstOrDefaultAsync();
     }
     
-    public async Task<Client> CreateClient(Client client, DbTransaction? transaction = null)
+    public async Task<Client> CreateClient(Client client)
     {
-        if (transaction != null)
-        {
-            await _dbContext.Database.UseTransactionAsync(transaction);
-        }
-        
         client.CreatedAt = SystemClock.Instance.GetCurrentInstant();
         
         await _dbContext.Clients.AddAsync(client);
@@ -97,13 +77,8 @@ public class ClientRepository : IClientRepository
         return client;
     }
     
-    public async Task<bool> UpdateClient(Client client, DbTransaction? transaction = null)
+    public async Task<bool> UpdateClient(Client client)
     {
-        if (transaction != null)
-        {
-            await _dbContext.Database.UseTransactionAsync(transaction);
-        }
-    
         var existingClient = await _dbContext.Clients
             .Where(c => c.Id == client.Id && !c.IsDeleted)
             .FirstOrDefaultAsync();
@@ -125,13 +100,8 @@ public class ClientRepository : IClientRepository
         return true;
     }
     
-    public async Task<bool> DeleteClient(Guid id, DbTransaction? transaction = null)
+    public async Task<bool> DeleteClient(Guid id)
     {
-        if (transaction != null)
-        {
-            await _dbContext.Database.UseTransactionAsync(transaction);
-        }
-    
         var client = await _dbContext.Clients
             .Where(c => c.Id == id && !c.IsDeleted)
             .FirstOrDefaultAsync();

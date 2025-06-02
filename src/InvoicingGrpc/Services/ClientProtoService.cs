@@ -226,8 +226,8 @@ public class ClientService : ClientProtoService.ClientProtoServiceBase
             Address = client.Address ?? string.Empty,
             PhoneNumber = client.PhoneNumber ?? string.Empty,
             CompanyName = client.CompanyName ?? string.Empty,
-            CreatedAt = client.CreatedAt.ToString("o", null),
-            UpdatedAt = client.UpdatedAt?.ToString("o", null) ?? client.CreatedAt.ToString("o", null)
+            CreatedAt = client.CreatedAt.ToString(),
+            UpdatedAt = client.UpdatedAt?.ToString() ?? client.CreatedAt.ToString()
         };
     }
 }
