@@ -8,6 +8,8 @@
 # Design Solution:
 * Vertical Slice Architecture
 
+The project is structured using a [Vertical Slice Architecture](https://www.jimmybogard.com/vertical-slice-architecture/) pattern, which organizes the codebase around features rather than technical layers. This approach enhances maintainability, scalability, and testability by isolating features and reducing dependencies between them.
+
 # Development Tools:
 * dotnet cli
 * Jetbrains Rider 2025.1.2 (Non-commercial)
